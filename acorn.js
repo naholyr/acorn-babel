@@ -469,7 +469,7 @@
 
   // '*' may be multiply or have special meaning in ES6
   var _star = {binop: 10, beforeExpr: true};
-  var _exponent = {binop: 11, beforeExpr: true, rightAssociative: true};
+  var _exponent = {binop: 11, beforeExpr: true};
 
   // '<', '>' may be relational or have special meaning in JSX
   var _lt = {binop: 7, beforeExpr: true}, _gt = {binop: 7, beforeExpr: true};
@@ -2515,17 +2515,9 @@
         var op = tokType;
         next();
         var start = storeCurrentPos();
-        if (op.rightAssociative) {
-          node.right = parseExprOp(parseMaybeUnary(), start, minPrec, noIn);
-        } else {
-          node.right = parseExprOp(parseMaybeUnary(), start, prec, noIn);
-        }
+        node.right = parseExprOp(parseMaybeUnary(), start, prec, noIn);
         finishNode(node, (op === _logicalOR || op === _logicalAND) ? "LogicalExpression" : "BinaryExpression");
-        if (op.rightAssociative) {
-          return node;
-        } else {
-          return parseExprOp(node, leftStart, minPrec, noIn);
-        }
+        return parseExprOp(node, leftStart, minPrec, noIn);
       }
     }
     return left;
