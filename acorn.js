@@ -318,9 +318,11 @@
   // reject `yield`s outside of generators, `labels` to verify
   // that `break` and `continue` have somewhere to jump to, and
   // `strict` indicates whether strict mode is on.
+  // `optionalIdent` indicates current identifier is marked as
+  // optional (Elvis operator)
 
   var inFunction, inGenerator, inAsync, labels, strict,
-    inXJSChild, inXJSTag, inType;
+    inXJSChild, inXJSTag, inType, optionalIdent;
 
   function initParserState() {
     lastStart = lastEnd = tokPos;
@@ -962,6 +964,28 @@
     return finishOp(code === 61 ? _eq : _prefix, 1);
   }
 
+  function readToken_question() {
+    ++tokPos;
+    // Elvis operator? only applied to identifier
+    if (options.playground && tokType == _name) {
+      var next = input.charCodeAt(tokPos);
+      // Elvis property operator: obj?.prop
+      if (next == 46) { // '.'
+        ++tokPos;
+        optionalIdent = true;
+        return finishToken(_dot);
+      }
+      // Elvis function call: foo?()
+      if (next == 40) { // '('
+        ++tokPos;
+        optionalIdent = true;
+        return finishToken(_parenL);
+      }
+    }
+    // Otherwise, read '?' as usuall
+    return finishToken(_question);
+  }
+
   // Get token inside ES6 template (special rules work there).
 
   function getTemplateToken(code) {
@@ -996,7 +1020,9 @@
     case 93: ++tokPos; return finishToken(_bracketR);
     case 123: ++tokPos; return finishToken(_braceL);
     case 125: ++tokPos; return finishToken(_braceR);
-    case 63: ++tokPos; return finishToken(_question);
+
+    case 63:
+      return readToken_question();
 
     case 35:
       if (options.playground) {
@@ -3138,6 +3164,10 @@
   function parseExprSubscripts(refShorthandDefaultPos) {
     var start = storeCurrentPos();
     var expr = parseExprAtom(refShorthandDefaultPos);
+    if (optionalIdent) {
+      optionalIdent = false; // Mark as done
+      expr.optional = true;
+    }
     if (refShorthandDefaultPos && refShorthandDefaultPos.start) return expr;
     return parseSubscripts(expr, start);
   }

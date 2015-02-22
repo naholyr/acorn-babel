@@ -609,3 +609,65 @@ test("arr.map(#toFixed(2))", {
 }, {
   playground: true
 });
+
+test("obj?.prop", {
+  type: "Program",
+  start: 0,
+  end: 9,
+  body: [
+    {
+      type: "ExpressionStatement",
+      start: 0,
+      end: 9,
+      expression: {
+        type: "MemberExpression",
+        start: 0,
+        end: 9,
+        object: {
+          type: "Identifier",
+          start: 0,
+          end: 3,
+          name: "obj",
+          optional: true
+        },
+        property: {
+          type: "Identifier",
+          start: 5,
+          end: 9,
+          name: "prop"
+        },
+        computed: false
+      }
+    }
+  ]
+}, {
+  playground: true
+});
+
+test("foo?()", {
+  type: "Program",
+  start: 0,
+  end: 6,
+  body: [
+    {
+      type: "ExpressionStatement",
+      start: 0,
+      end: 6,
+      expression: {
+        type: "CallExpression",
+        start: 0,
+        end: 6,
+        callee: {
+          type: "Identifier",
+          start: 0,
+          end: 3,
+          name: "foo",
+          optional: true
+        },
+        arguments: []
+      }
+    }
+  ]
+}, {
+  playground: true
+});
